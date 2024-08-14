@@ -1,0 +1,41 @@
+name: Zotero Addons Scrape To GitHub
+
+on:
+  workflow_dispatch: # manual
+  schedule:
+    - cron: '15 4,7,10,14,19,23 * * *' # +8(beijing)
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  actions: write
+
+env:
+  TZ: Asia/Shanghai
+
+jobs:
+  scrape_data:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.x
+
+    - name: Install Dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Run Script
+      run: |
+        python scraper_to_github.py \
+          -i addons \
+          --github_repository ${GITHUB_REPOSITORY} \
+          --github_token ${GITHUB_TOKEN} \
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
